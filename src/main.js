@@ -6,7 +6,6 @@ import 'reset-css/reset.css'
 import store from '@/store'
 import router from '@/router/index'
 import moment from 'moment'
-import '@/modules/glMatrix'
 
 const app = createApp(App)
 
