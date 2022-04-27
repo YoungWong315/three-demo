@@ -7,6 +7,11 @@ const routes = [
     name: 'Index',
     component: () => import('@/views/Index.vue'),
   },
+  {
+    path: '/tricube',
+    name: 'TriCube',
+    component: () => import('@/views/TriCube.vue'),
+  },
 ]
 
 const router = vueRouter.createRouter({

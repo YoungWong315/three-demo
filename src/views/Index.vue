@@ -94,6 +94,7 @@ let plane = null
 function initPlane() {
   const textureLoader = new THREE.TextureLoader()
   textureLoader.load("test.jpeg", (texture) => {
+    console.log(texture)
     // texture.offset.set(0.1,0.5) // 纹理偏移
     const geometry = new THREE.PlaneGeometry(2, 2)
     // console.log(geometry)
@@ -135,14 +136,9 @@ function initObject() {
   const geometry1 = new THREE.BufferGeometry()
   const material = new THREE.LineBasicMaterial({ vertexColors: true /* 顶点颜色 */ })
 
-  let p1 = new THREE.Vector2(-100, 0, 0)
-  let p2 = new THREE.Vector3(100, 0, 0)
-  let p3 = new THREE.Vector3(0, -100, 0)
-  let p4 = new THREE.Vector3(0, 1000, 0)
-
   let line1 = [
     -100, 0, 0,
-    100, 0, 0
+    100, 0, 0,
   ]
   let line2 = [
     0, -100, 0,
@@ -184,7 +180,6 @@ function initStats() {
   stats.dom.setAttribute('style', style.replace('left: 0px', 'right: 0'))
   document.body.appendChild(stats.dom)
 }
-
 function initModel() {
   const loader = new GLTFLoader()
   loader.load(
