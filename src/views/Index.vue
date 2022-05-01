@@ -85,7 +85,7 @@ function initCube() {
   cube1.position.set(2, 0, 0)
   cube2.position.set(-5, 0, 0)
 
-  // 用打组的方式，可以改变旋转中心点
+  // 用打组的方式，可以改变旋转中心点（group默认 position (0,0,0)）
   cube = new THREE.Group() // 派生于 Object3D 其实等同于 new THREE.Object3D() 
 
   cube.add(cube1)
@@ -97,7 +97,6 @@ let plane = null
 function initPlane() {
   const textureLoader = new THREE.TextureLoader()
   textureLoader.load("test.jpeg", (texture) => {
-    console.log(texture)
     // texture.offset.set(0.1,0.5) // 纹理偏移
     const geometry = new THREE.PlaneGeometry(2, 2)
     // console.log(geometry)
@@ -117,7 +116,6 @@ function initShape() {
   shape.lineTo(-1, 0)
   shape.lineTo(0, 0)
   const geometry = new THREE.ShapeGeometry(shape)
-  console.log(geometry)
   // const material = new THREE.MeshBasicMaterial({ color: 0xffff00 })
   const material = new THREE.MeshBasicMaterial({ vertexColors: true })
   const color1 = new THREE.Color(0xff0000), color2 = new THREE.Color(0x0000ff), color3 = new THREE.Color(0x00ff00)

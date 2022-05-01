@@ -178,6 +178,11 @@ function initTriangleCube() {
   triCube = new THREE.Group()
   triCube.add(mesh)
 
+  // console.log(mesh) // mesh对象 里面的数据，都是 mesh 最早产生的默认数据
+  const box3 = new THREE.Box3().setFromObject(mesh) // 获取到 mesh 当前的 boundingBox 坐标（因为有移动过）
+  /* const meshCenter = box3.getCenter(mesh.position)
+  console.log(box3, meshCenter) */
+
   const boxHelper = new THREE.BoxHelper(mesh, 0xffff00)
   triCube.add(boxHelper)
 
@@ -193,7 +198,7 @@ function initStats() {
 }
 
 function initGrid() {
-  const helper = new THREE.GridHelper(1000, 50, 0xff0000, 0x00ff00)
+  const helper = new THREE.GridHelper(1000, 20, 0xff0000, 0x00ff00)
   scene.add(helper)
 }
 
@@ -220,6 +225,9 @@ function render() {
   const v1 = new THREE.Vector3(1,1,0)
   triCube.rotateOnAxis(v1, 0.01) // 围绕某一向量轴旋转
   // controls.update() // if controls.autoRotate sets to true
+  // triCube.translateX(1)
+  const box3 = new THREE.Box3().setFromObject(triCube) // 获取到object当前的boundingBox坐标（会随着object的移动或变形而改变）
+  // console.log(box3)
 
   raycaster.setFromCamera(pointer, camera)
   // const intersects = raycaster.intersectObjects([scene.children], false)
