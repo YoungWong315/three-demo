@@ -23,7 +23,7 @@ let camera = null
 function initCamera() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
   // 相机默认在原点（0,0,0），要综合考虑场景中物体z轴的距离才能看到，需要z轴里原点远一些（靠近人的方向）
-  camera.position.set(0, 0, 300)
+  camera.position.set(200, 200, 300)
   camera.up.set(0,1,0)
   // camera.lookAt(10, 10, 10)
 }
@@ -169,7 +169,18 @@ function initTriangleCube() {
 
   // geometry.computeBoundingBox()
 
-  triCube = new THREE.Mesh(geometry, material)
+  const mesh = new THREE.Mesh(geometry, material)
+  // 靠移动 mesh 的位置，调整group整体的中心点
+  mesh.translateX(-50)
+  mesh.translateZ(-50)
+  mesh.translateY(50)
+
+  triCube = new THREE.Group()
+  triCube.add(mesh)
+
+  const boxHelper = new THREE.BoxHelper(mesh, 0xffff00)
+  triCube.add(boxHelper)
+
   scene.add(triCube)
 }
 let stats = null
@@ -180,14 +191,61 @@ function initStats() {
   stats.dom.setAttribute('style', style.replace('left: 0px', 'right: 0'))
   document.body.appendChild(stats.dom)
 }
+
+function initGrid() {
+  const helper = new THREE.GridHelper(1000, 50, 0xff0000, 0x00ff00)
+  scene.add(helper)
+}
+
+const raycaster = new THREE.Raycaster()
+// 由于 triCube 本身就在canvas 0,0 处，pointer 默认也在 0,0 处。会导致初始化时，被看成相交状态。所以初始值修改成 -1,-1
+const pointer = new THREE.Vector2(-1,-1)
+function onPointerMove(event) {
+  // 转换为归一化坐标
+  /**
+   * 1. event的 x,y 坐标是从左上角为 0,0
+   * 2. there.js的 0,0 坐标为 canvas 中心点，且 x，y, z 轴的最大值为 1，最小值为 -1
+   * 3. 所以要把鼠标的坐标转换为 Vector2 的坐标
+   * 4. Vector2 坐标轴总长度是 2，所以 event.clientX / canvasWidth * 2 - 1，即是真实的 Vector2 x轴坐标，y轴坐标同理
+   */
+  pointer.x = (event.clientX / window.innerWidth * 2) - 1
+  pointer.y = -(event.clientY / window.innerHeight * 2) + 1
+}
 // 实时渲染
+let INTERSECTED
 function render() {
-  triCube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
-  triCube.rotateY(0.01)
+  /* triCube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
+  triCube.rotateY(0.01) */
+  // 与上面效果一致
+  const v1 = new THREE.Vector3(1,1,0)
+  triCube.rotateOnAxis(v1, 0.01) // 围绕某一向量轴旋转
   // controls.update() // if controls.autoRotate sets to true
+
+  raycaster.setFromCamera(pointer, camera)
+  // const intersects = raycaster.intersectObjects([scene.children], false)
+  const intersects = raycaster.intersectObjects([triCube], false) // 这里只监听这一个物体
+  // 由于 triCube 虽然由很多三角形组成，但是整体为一个 Mesh, 所以这里 pointer 与 triCube 相交时会把整体改成红色
+  if ( intersects.length > 0 ) {
+    // 从示例中看，intersects[ 0 ] 即是当前选中的物体
+    if ( INTERSECTED != intersects[ 0 ].object) {
+      if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+      INTERSECTED = intersects[ 0 ].object;
+      INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
+      INTERSECTED.material.emissive.setHex( 0xff0000 );
+    }
+  } else {
+    if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
+    INTERSECTED = null;
+  }
+
   // 真正渲染
   renderer.render(scene, camera)
-  requestAnimationFrame(render)
+}
+
+function animate() {
+  requestAnimationFrame(animate)
+
+  render()
   stats.update()
 }
 
@@ -199,7 +257,11 @@ onMounted(() => {
   initLight()
   initStats()
   initTriangleCube()
-  render()
+  initGrid()
+
+  animate()
+
+  document.addEventListener('mousemove', onPointerMove)
 
   window.onresize = () => {
     renderer.setSize(window.innerWidth, window.innerHeight)

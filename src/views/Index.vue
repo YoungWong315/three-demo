@@ -11,6 +11,8 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const query = router.currentRoute.value.query
+const containerWidth = 800
+const containerHeight = 800
 
 // 场景
 let scene = null
@@ -20,7 +22,7 @@ function initScene() {
 // 相机
 let camera = null
 function initCamera() {
-  camera = new THREE.PerspectiveCamera(75, 1, 1, 1000)
+  camera = new THREE.PerspectiveCamera(75, containerWidth / containerHeight, 1, 1000)
   // 相机默认在原点（0,0,0），要综合考虑场景中物体z轴的距离才能看到，需要z轴里原点远一些（靠近人的方向）
   camera.position.set(0, 0, 10)
   camera.up.set(0,1,0)
@@ -30,7 +32,7 @@ function initCamera() {
 let renderer = null
 function initRenderer() {
   renderer = new THREE.WebGLRenderer({ antialias: true /* 抗锯齿(影响一部分性能) */ })
-  renderer.setSize(800, 800)
+  renderer.setSize(containerWidth, containerHeight)
   renderer.setClearColor(0x008000, 0.4)
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1
@@ -81,10 +83,11 @@ function initCube() {
   cube1 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
   cube2 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
   cube1.position.set(2, 0, 0)
-  cube2.position.set(-1, 0, 0)
+  cube2.position.set(-5, 0, 0)
 
   // 用打组的方式，可以改变旋转中心点
-  cube = new THREE.Group()
+  cube = new THREE.Group() // 派生于 Object3D 其实等同于 new THREE.Object3D() 
+
   cube.add(cube1)
   cube.add(cube2)
   scene.add(cube)
@@ -134,7 +137,7 @@ function initObject() {
   // 两种循环
   const geometry = new THREE.BufferGeometry()
   const geometry1 = new THREE.BufferGeometry()
-  const material = new THREE.LineBasicMaterial({ vertexColors: true /* 顶点颜色 */ })
+  const material = new THREE.LineBasicMaterial({ vertexColors: true /* 顶点颜色 */, side: THREE.DoubleSide })
 
   let line1 = [
     -100, 0, 0,
@@ -207,6 +210,14 @@ function initModel() {
     }
   )
 }
+const raycaster = new THREE.Raycaster()
+const pointer = new THREE.Vector2()
+function onPointerMove(event) {
+  pointer.x = event.clientX / containerWidth * 2 - 1
+  pointer.y = event.clientY / containerHeight * 2 - 1
+}
+
+let INTERSECTED
 // 实时渲染
 function render() {
   /* cube.rotation.x += 0.01
@@ -217,9 +228,30 @@ function render() {
   cube1.rotateZ(0.01)
   cube2.rotateZ(-0.01)
   // controls.update() // if controls.autoRotate sets to true
+
+  raycaster.setFromCamera(pointer, camera)
+  const intersects = raycaster.intersectObjects(scene.children)
+  if (intersects.length > 0) {
+    if (INTERSECTED != intersects[0].object) {
+      if (INTERSECTED && INTERSECTED.material.color) INTERSECTED.material.color.setHex(INTERSECTED.currentHex)
+      INTERSECTED = intersects[0].object
+      console.log('intersectObjects: ', INTERSECTED)
+      INTERSECTED.currentHex = (INTERSECTED.material.color && INTERSECTED.material.color.getHex()) || null
+      const color = new THREE.Color(0xff0000)
+      INTERSECTED.material.color = color
+    }
+  } else {
+    if (INTERSECTED && INTERSECTED.material.color) INTERSECTED.material.color.setHex(INTERSECTED.currentHex)
+    INTERSECTED = null
+  }
+  
   // 真正渲染
   renderer.render(scene, camera)
-  requestAnimationFrame(render)
+}
+function animate() {
+  requestAnimationFrame(animate)
+  render()
+
   stats.update()
   TWEEN.update()
 }
@@ -237,7 +269,8 @@ onMounted(() => {
   initLight()
   initObject()
   initStats()
-  render()
+
+  animate()
 
   let tween1 = new TWEEN.Tween(cube.position).to({ x: 4, y: 4, z: 4 }, 5 * 1000)
   let tween2 = new TWEEN.Tween(cube.position).to({ x: 0, y: 0, z: 0 }, 5 * 1000)
@@ -245,6 +278,7 @@ onMounted(() => {
   tween2.chain(tween1)  
 
   // tween1.start()
+  document.addEventListener('mousemove', onPointerMove)
 })
 </script> 
 
