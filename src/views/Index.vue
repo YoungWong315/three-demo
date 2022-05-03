@@ -66,19 +66,20 @@ let cube1 = null
 let cube2 = null
 function initCube() {
   const geometry = new THREE.BoxGeometry(1,1,1)
+  // const geometry = new THREE.BoxGeometry(100,100,100)
   // const geometry = new THREE.IcosahedronGeometry(1, 10)
-  const material1 = new THREE.MeshLambertMaterial({color: 0xFFFFFF})
-  const material2 = new THREE.MeshLambertMaterial({color: 0xFF0000, wireframe: true})
-  const material3 = new THREE.MeshLambertMaterial({color: 0x00FF00, wireframe: true /* 仅显示线框 */})
-  const material4 = new THREE.MeshLambertMaterial({color: 0x0000FF})
-  const material5 = new THREE.MeshLambertMaterial({color: 0xfefefe})
+  const material1 = new THREE.MeshLambertMaterial({color: 0xFFFFFF, side: THREE.DoubleSide})
+  const material2 = new THREE.MeshLambertMaterial({color: 0xFF0000, wireframe: true, side: THREE.DoubleSide})
+  const material3 = new THREE.MeshLambertMaterial({color: 0x00FF00, wireframe: true /* 仅显示线框 */, side: THREE.DoubleSide})
+  const material4 = new THREE.MeshLambertMaterial({color: 0x0000FF, side: THREE.DoubleSide})
+  const material5 = new THREE.MeshLambertMaterial({color: 0xfefefe, side: THREE.DoubleSide})
 
   const texture = new THREE.TextureLoader().load("test.jpeg")
   // s、t相当于x、y，所以下面两行代码意思是设置x轴和y轴的包围模式
   texture.wrapS = THREE.RepeatWrapping
   texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(2, 2) // param: x轴重复次数，y轴重复次数
-  const material6 = new THREE.MeshLambertMaterial({map: texture})
+  const material6 = new THREE.MeshLambertMaterial({map: texture, side: THREE.DoubleSide})
 
   cube1 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
   cube2 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
@@ -188,6 +189,7 @@ function initModel() {
     'models/scene.gltf',
     // called when the resource is loaded
     (gltf) => {
+      console.log(gltf)
       gltf.scene.position.x = 1
       gltf.scene.position.y = 1
       gltf.scene.position.z = 0
@@ -208,6 +210,29 @@ function initModel() {
     }
   )
 }
+function initPoints() {
+  const vertices = [];
+
+  for ( let i = 0; i < 10000; i ++ ) {
+
+    const x = THREE.MathUtils.randFloatSpread( 200 );
+    const y = THREE.MathUtils.randFloatSpread( 200 );
+    const z = THREE.MathUtils.randFloatSpread( 200 );
+
+    vertices.push( x, y, z );
+
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+  const material = new THREE.PointsMaterial( { color: 0xffffff, size: 1 } );
+
+  const points = new THREE.Points( geometry, material );
+
+  scene.add( points )
+}
+
 const raycaster = new THREE.Raycaster()
 const pointer = new THREE.Vector2()
 function onPointerMove(event) {
@@ -221,14 +246,14 @@ function render() {
   /* cube.rotation.x += 0.01
   cube.rotation.y += 0.01 */
   // cube.position.x += 0.01
-  cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
+  /* cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
   cube.rotateY(0.01)
   cube1.rotateZ(0.01)
-  cube2.rotateZ(-0.01)
+  cube2.rotateZ(-0.01) */
   // controls.update() // if controls.autoRotate sets to true
 
   raycaster.setFromCamera(pointer, camera)
-  const intersects = raycaster.intersectObjects(scene.children)
+  /* const intersects = raycaster.intersectObjects(scene.children)
   if (intersects.length > 0) {
     if (INTERSECTED != intersects[0].object) {
       if (INTERSECTED && INTERSECTED.material.color) INTERSECTED.material.color.setHex(INTERSECTED.currentHex)
@@ -241,7 +266,7 @@ function render() {
   } else {
     if (INTERSECTED && INTERSECTED.material.color) INTERSECTED.material.color.setHex(INTERSECTED.currentHex)
     INTERSECTED = null
-  }
+  } */
   
   // 真正渲染
   renderer.render(scene, camera)
@@ -267,6 +292,7 @@ onMounted(() => {
   initLight()
   initObject()
   initStats()
+  initPoints()
 
   animate()
 

@@ -51,7 +51,6 @@ function initControls() {
 }
 let light
 function initLight() {
-  // light = new THREE.AmbientLight(0xffffff, 1.0)
   light = new THREE.DirectionalLight(0xffffff, 1.0)
   light.position.x = 100
   light.position.y = 100
@@ -168,7 +167,6 @@ function initTriangleCube() {
   geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
 
   // geometry.computeBoundingBox()
-
   const mesh = new THREE.Mesh(geometry, material)
   // 靠移动 mesh 的位置，调整group整体的中心点
   mesh.translateX(-50)
@@ -216,6 +214,29 @@ function onPointerMove(event) {
   pointer.x = (event.clientX / window.innerWidth * 2) - 1
   pointer.y = -(event.clientY / window.innerHeight * 2) + 1
 }
+// 例子系统
+function initPoints() {
+  const vertices = [];
+
+  for ( let i = 0; i < 10000; i ++ ) {
+
+    const x = THREE.MathUtils.randFloatSpread( 2000 );
+    const y = THREE.MathUtils.randFloatSpread( 2000 );
+    const z = THREE.MathUtils.randFloatSpread( 2000 );
+
+    vertices.push( x, y, z );
+
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+  const material = new THREE.PointsMaterial( { color: 0xffffff, size: 10 } );
+
+  const points = new THREE.Points( geometry, material );
+
+  scene.add( points )
+}
 // 实时渲染
 let INTERSECTED
 function render() {
@@ -239,7 +260,7 @@ function render() {
       if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
       INTERSECTED = intersects[ 0 ].object;
       INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-      INTERSECTED.material.emissive.setHex( 0xff0000 );
+      INTERSECTED.material.emissive.setHex( 0x000000 );
     }
   } else {
     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
@@ -264,6 +285,7 @@ onMounted(() => {
   initControls()
   initLight()
   initStats()
+  initPoints()
   initTriangleCube()
   initGrid()
 
