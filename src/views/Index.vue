@@ -37,6 +37,7 @@ function initRenderer() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1
   renderer.outputEncoding = THREE.sRGBEncoding
+  renderer.physicallyCorrectLights = true
   const container = document.getElementById('three-container')
   if (container.childNodes.length > 0) {
     container.replaceChild(container.children[0], renderer.domElement)
