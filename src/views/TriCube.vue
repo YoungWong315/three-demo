@@ -164,7 +164,10 @@ function initTriangleCube() {
 
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3))
   geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
-  geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
+
+  // geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3))
+  // 上面是自己计算法线，下面的方法是three.js 自带的 计算法线 的方法
+  geometry.computeVertexNormals()
 
   // geometry.computeBoundingBox()
   const mesh = new THREE.Mesh(geometry, material)
@@ -285,7 +288,7 @@ onMounted(() => {
   initControls()
   initLight()
   initStats()
-  initPoints()
+  // initPoints()
   initTriangleCube()
   initGrid()
 
