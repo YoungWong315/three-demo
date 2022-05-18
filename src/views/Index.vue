@@ -38,6 +38,9 @@ function initRenderer() {
   renderer.toneMappingExposure = 1
   renderer.outputEncoding = THREE.sRGBEncoding
   renderer.physicallyCorrectLights = true
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.needsUpdate = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
   const container = document.getElementById('three-container')
   if (container.childNodes.length > 0) {
     container.replaceChild(container.children[0], renderer.domElement)
@@ -53,12 +56,11 @@ function initControls() {
 }
 let light
 function initLight() {
-  light = new THREE.AmbientLight(0xffffff, 1.0)
-  /* light = new THREE.DirectionalLight(0xffffff, 1.0)
-  light.position.x = 0
-  light.position.y = 0
-  light.position.z = 100
-  light.target = cube */
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+  light = new THREE.DirectionalLight(0xffffff, 2.0)
+  light.position.set(100,100,100)
+  light.castShadow = true
+  scene.add(ambientLight)
   scene.add(light)
 }
 // 画一个cube
@@ -87,6 +89,9 @@ function initCube() {
   cube1.position.set(2, 0, 0)
   cube2.position.set(-5, 0, 0)
 
+  cube1.castShadow = true
+  cube2.castShadow = true
+
   // 用打组的方式，可以改变旋转中心点（group默认 position (0,0,0)）
   cube = new THREE.Group() // 派生于 Object3D 其实等同于 new THREE.Object3D() 
 
@@ -100,13 +105,22 @@ function initPlane() {
   const textureLoader = new THREE.TextureLoader()
   textureLoader.load("test.jpeg", (texture) => {
     // texture.offset.set(0.1,0.5) // 纹理偏移
-    const geometry = new THREE.PlaneGeometry(2, 2)
+    // const geometry = new THREE.PlaneGeometry(0.5, 0.5, 1)
+    const geometry = new THREE.BoxGeometry(0.5, 0.5, 1)
     // console.log(geometry)
     const material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide /* 绘制两个面，默认只绘制正面，背面看不到 */ })
     plane = new THREE.Mesh(geometry, material)
-    plane.position.set(2,2,0)
+    plane.position.set(camera.position.x + 2, camera.position.y + 2, camera.position.z - 5)
     scene.add(plane)
   })
+  // 接收阴影的平面
+  const geometry = new THREE.PlaneGeometry(20, 20)
+  const material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+  const planeFloor = new THREE.Mesh(geometry, material)
+  planeFloor.position.set(0, -2, 0)
+  planeFloor.rotateX(-Math.PI/2)
+  planeFloor.receiveShadow = true
+  scene.add(planeFloor)
 }
 // 画一个三角形
 function initShape() {
@@ -247,11 +261,24 @@ function render() {
   /* cube.rotation.x += 0.01
   cube.rotation.y += 0.01 */
   // cube.position.x += 0.01
-  /* cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
+  cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
   cube.rotateY(0.01)
   cube1.rotateZ(0.01)
-  cube2.rotateZ(-0.01) */
+  cube2.rotateZ(-0.01)
   // controls.update() // if controls.autoRotate sets to true
+
+  const zDistance = 5
+  if (plane) {
+    // 通过这种方式，使模型永远和相机位置关联。如果需要抖动可以尝试把 Math.sin 之类的 数学函数增加到位置的变化上
+    plane.position.set(
+      camera.position.x - zDistance * Math.sin(camera.rotation.y),
+      camera.position.y,
+      camera.position.z + camera.rotation.y > Math.PI / 2 ? zDistance * Math.cos(camera.rotation.y) : -zDistance * Math.cos(camera.rotation.y),
+    )
+    // 换算成角度
+    console.log(camera.rotation.y / Math.PI * 180, Math.sin(camera.rotation.y))
+    plane.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z)
+  }
 
   raycaster.setFromCamera(pointer, camera)
   /* const intersects = raycaster.intersectObjects(scene.children)

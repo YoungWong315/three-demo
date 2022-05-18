@@ -36,6 +36,9 @@ function initRenderer() {
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1
   renderer.outputEncoding = THREE.sRGBEncoding
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.needsUpdate = true
+  renderer.shadowMap.type = THREE.BasicShadowMap
   const container = document.getElementById('three-container')
   if (container.childNodes.length > 0) {
     container.replaceChild(container.children[0], renderer.domElement)
