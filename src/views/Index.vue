@@ -110,7 +110,6 @@ function initPlane() {
     // console.log(geometry)
     const material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide /* 绘制两个面，默认只绘制正面，背面看不到 */ })
     plane = new THREE.Mesh(geometry, material)
-    plane.position.set(camera.position.x + 2, camera.position.y + 2, camera.position.z - 5)
     scene.add(plane)
   })
   // 接收阴影的平面
@@ -273,11 +272,21 @@ function render() {
     plane.position.set(
       camera.position.x - zDistance * Math.sin(camera.rotation.y),
       camera.position.y,
-      camera.position.z + camera.rotation.y > Math.PI / 2 ? zDistance * Math.cos(camera.rotation.y) : -zDistance * Math.cos(camera.rotation.y),
+      camera.position.z - zDistance * Math.cos(camera.rotation.y),
     )
     // 换算成角度
-    console.log(camera.rotation.y / Math.PI * 180, Math.sin(camera.rotation.y))
+    // console.log(camera.rotation.y / Math.PI * 180, Math.sin(camera.rotation.y))
     plane.rotation.set(camera.rotation.x, camera.rotation.y, camera.rotation.z)
+  }
+  if (bullet) {
+    // bullet.position.set(plane.position.x, plane.position.y + 0.8, plane.position.z)
+    // 每次渲染，更改位置（这里要考虑到旋转的方向）
+    const speed = 3
+    bullet.position.add(new THREE.Vector3(
+      -Math.sin(camera.rotation.y) /* 相机旋转方向 */ * speed,
+      0.1,
+      -Math.cos(camera.rotation.y) /* 相机旋转方向 */ * speed
+    ))
   }
 
   raycaster.setFromCamera(pointer, camera)
@@ -307,6 +316,40 @@ function animate() {
   TWEEN.update()
 }
 
+let bullet = null
+function onMouseDown(event) {
+  if (bullet instanceof THREE.Mesh) {
+    scene.remove(bullet)
+  }
+  // 换算到画板上的位置
+  const x = event.clientX / containerWidth * 2 - 1
+  const y = event.clientY / containerHeight * 2 - 1
+
+  bullet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.05, 8, 8),
+    new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide })
+  )
+  bullet.position.set(plane.position.x, plane.position.y + 0.8, plane.position.z)
+  scene.add(bullet)
+}
+
+function onKeyDown(event) {
+  const { keyCode } = event
+  switch(keyCode) {
+    case 37: // left
+      camera.rotateY(0.01)
+      break
+    case 38: // up
+      camera.position.z += 1
+      break
+    case 39: // right
+      camera.rotateY(-0.01)
+      break
+    case 40: // right
+      camera.position.z -= 1
+      break
+  }
+}
 
 onMounted(() => {
   initScene()
@@ -331,6 +374,8 @@ onMounted(() => {
 
   // tween1.start()
   document.addEventListener('mousemove', onPointerMove)
+  document.addEventListener('click', onMouseDown)
+  document.addEventListener('keydown', onKeyDown)
 })
 </script> 
 
