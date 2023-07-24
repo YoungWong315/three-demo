@@ -12,6 +12,11 @@ const routes = [
     name: 'TriCube',
     component: () => import('@/views/TriCube.vue'),
   },
+  {
+    path: '/model',
+    name: 'Model',
+    component: () => import('@/views/Model.vue'),
+  },
 ]
 
 const router = vueRouter.createRouter({

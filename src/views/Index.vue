@@ -16,21 +16,21 @@ const containerHeight = 800
 
 // 场景
 let scene = null
-function initScene() {
+function initScene () {
   scene = new THREE.Scene()
 }
 // 相机
 let camera = null
-function initCamera() {
+function initCamera () {
   camera = new THREE.PerspectiveCamera(75, containerWidth / containerHeight, 1, 1000)
   // 相机默认在原点（0,0,0），要综合考虑场景中物体z轴的距离才能看到，需要z轴里原点远一些（靠近人的方向）
   camera.position.set(0, 0, 10)
-  camera.up.set(0,1,0)
+  camera.up.set(0, 1, 0)
   // camera.lookAt(10, 10, 10)
 }
 // 渲染器
 let renderer = null
-function initRenderer() {
+function initRenderer () {
   renderer = new THREE.WebGLRenderer({ antialias: true /* 抗锯齿(影响一部分性能) */ })
   renderer.setSize(containerWidth, containerHeight)
   renderer.setClearColor(0x008000, 0.4)
@@ -49,16 +49,16 @@ function initRenderer() {
   }
 }
 let controls = null
-function initControls() {
+function initControls () {
   controls = new OrbitControls(camera, renderer.domElement)
   // controls.autoRotate = true
   controls.update()
 }
 let light
-function initLight() {
+function initLight () {
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
   light = new THREE.DirectionalLight(0xffffff, 2.0)
-  light.position.set(100,100,100)
+  light.position.set(100, 100, 100)
   light.castShadow = true
   scene.add(ambientLight)
   scene.add(light)
@@ -67,22 +67,22 @@ function initLight() {
 let cube = null
 let cube1 = null
 let cube2 = null
-function initCube() {
-  const geometry = new THREE.BoxGeometry(1,1,1)
+function initCube () {
+  const geometry = new THREE.BoxGeometry(1, 1, 1)
   // const geometry = new THREE.BoxGeometry(100,100,100)
   // const geometry = new THREE.IcosahedronGeometry(1, 10)
-  const material1 = new THREE.MeshLambertMaterial({color: 0xFFFFFF, side: THREE.DoubleSide})
-  const material2 = new THREE.MeshLambertMaterial({color: 0xFF0000, wireframe: true, side: THREE.DoubleSide})
-  const material3 = new THREE.MeshLambertMaterial({color: 0x00FF00, wireframe: true /* 仅显示线框 */, side: THREE.DoubleSide})
-  const material4 = new THREE.MeshLambertMaterial({color: 0x0000FF, side: THREE.DoubleSide})
-  const material5 = new THREE.MeshLambertMaterial({color: 0xfefefe, side: THREE.DoubleSide})
+  const material1 = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
+  const material2 = new THREE.MeshLambertMaterial({ color: 0xFF0000, wireframe: true, side: THREE.DoubleSide })
+  const material3 = new THREE.MeshLambertMaterial({ color: 0x00FF00, wireframe: true /* 仅显示线框 */, side: THREE.DoubleSide })
+  const material4 = new THREE.MeshLambertMaterial({ color: 0x0000FF, side: THREE.DoubleSide })
+  const material5 = new THREE.MeshLambertMaterial({ color: 0xfefefe, side: THREE.DoubleSide })
 
   const texture = new THREE.TextureLoader().load("test.jpeg")
   // s、t相当于x、y，所以下面两行代码意思是设置x轴和y轴的包围模式
   texture.wrapS = THREE.RepeatWrapping
   texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(2, 2) // param: x轴重复次数，y轴重复次数
-  const material6 = new THREE.MeshLambertMaterial({map: texture, side: THREE.DoubleSide})
+  const material6 = new THREE.MeshLambertMaterial({ map: texture, side: THREE.DoubleSide })
 
   cube1 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
   cube2 = new THREE.Mesh(geometry, [material1, material2, material3, material4, material5, material6])
@@ -101,14 +101,14 @@ function initCube() {
 }
 // 画一个平面
 let plane = null
-function initPlane() {
+function initPlane () {
   const textureLoader = new THREE.TextureLoader()
   textureLoader.load("test.jpeg", (texture) => {
     // texture.offset.set(0.1,0.5) // 纹理偏移
     // const geometry = new THREE.PlaneGeometry(0.5, 0.5, 1)
     const geometry = new THREE.BoxGeometry(0.5, 0.5, 1)
     // console.log(geometry)
-    const material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide /* 绘制两个面，默认只绘制正面，背面看不到 */ })
+    const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide /* 绘制两个面，默认只绘制正面，背面看不到 */ })
     plane = new THREE.Mesh(geometry, material)
     scene.add(plane)
   })
@@ -117,12 +117,12 @@ function initPlane() {
   const material = new THREE.MeshPhongMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide })
   const planeFloor = new THREE.Mesh(geometry, material)
   planeFloor.position.set(0, -2, 0)
-  planeFloor.rotateX(-Math.PI/2)
+  planeFloor.rotateX(-Math.PI / 2)
   planeFloor.receiveShadow = true
   scene.add(planeFloor)
 }
 // 画一个三角形
-function initShape() {
+function initShape () {
   const shape = new THREE.Shape()
   shape.moveTo(0, 0)
   // shape.arc(0, 0, 5, (Math.PI / 180) * 0, (Math.PI / 180) * 180, false)
@@ -146,7 +146,7 @@ function initShape() {
   scene.add(mesh)
 }
 // 画一个网格
-function initObject() {
+function initObject () {
   // 两种循环
   const geometry = new THREE.BufferGeometry()
   const geometry1 = new THREE.BufferGeometry()
@@ -161,8 +161,8 @@ function initObject() {
     0, 100, 0
   ]
 
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(line1, 3 ))
-  geometry1.setAttribute('position', new THREE.Float32BufferAttribute(line2, 3 ))
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(line1, 3))
+  geometry1.setAttribute('position', new THREE.Float32BufferAttribute(line2, 3))
   // geometry.setFromPoints([p1, p2])
   // geometry1.setFromPoints([p3, p4])
 
@@ -175,7 +175,7 @@ function initObject() {
     color3.r, color3.g, color3.b,
     color2.r, color2.g, color2.b,
   ]
-  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3 ))
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
   geometry1.setAttribute('color', new THREE.Float32BufferAttribute(colors1, 3))
 
   for (let i = -20; i <= 20; i++) {
@@ -189,14 +189,14 @@ function initObject() {
   }
 }
 let stats = null
-function initStats() {
+function initStats () {
   stats = new Stats()
   stats.showPanel(1) // 0: fps, 1: ms, 2: mb, 3+: custom
   const style = stats.dom.getAttribute('style')
   stats.dom.setAttribute('style', style.replace('left: 0px', 'right: 0'))
   document.body.appendChild(stats.dom)
 }
-function initModel() {
+function initModel () {
   const loader = new GLTFLoader()
   loader.load(
     // resource URL
@@ -216,7 +216,7 @@ function initModel() {
     },
     // called while loading is progressing
     (xhr) => {
-      console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     },
     // called when loading has errors
     (error) => {
@@ -224,43 +224,43 @@ function initModel() {
     }
   )
 }
-function initPoints() {
+function initPoints () {
   const vertices = [];
 
-  for ( let i = 0; i < 10000; i ++ ) {
+  for (let i = 0; i < 10000; i++) {
 
-    const x = THREE.MathUtils.randFloatSpread( 200 );
-    const y = THREE.MathUtils.randFloatSpread( 200 );
-    const z = THREE.MathUtils.randFloatSpread( 200 );
+    const x = THREE.MathUtils.randFloatSpread(200);
+    const y = THREE.MathUtils.randFloatSpread(200);
+    const z = THREE.MathUtils.randFloatSpread(200);
 
-    vertices.push( x, y, z );
+    vertices.push(x, y, z);
 
   }
 
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 
-  const material = new THREE.PointsMaterial( { color: 0xffffff, size: 1 } );
+  const material = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
 
-  const points = new THREE.Points( geometry, material );
+  const points = new THREE.Points(geometry, material);
 
-  scene.add( points )
+  scene.add(points)
 }
 
 const raycaster = new THREE.Raycaster()
 const pointer = new THREE.Vector2()
-function onPointerMove(event) {
+function onPointerMove (event) {
   pointer.x = event.clientX / containerWidth * 2 - 1
   pointer.y = event.clientY / containerHeight * 2 - 1
 }
 
 let INTERSECTED
 // 实时渲染
-function render() {
+function render () {
   /* cube.rotation.x += 0.01
   cube.rotation.y += 0.01 */
   // cube.position.x += 0.01
-  cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
+  /* cube.rotateX(0.01) // 旋转的值为 2 * Math.PI 为一周（360度）
   cube.rotateY(0.01)
   cube1.rotateZ(0.01)
   cube2.rotateZ(-0.01)
@@ -283,11 +283,11 @@ function render() {
     // 每次渲染，更改位置（这里要考虑到旋转的方向）
     const speed = 3
     bullet.position.add(new THREE.Vector3(
-      -Math.sin(camera.rotation.y) /* 相机旋转方向 */ * speed,
+      -Math.sin(camera.rotation.y) * speed, // 相机旋转方向
       0.1,
-      -Math.cos(camera.rotation.y) /* 相机旋转方向 */ * speed
+      -Math.cos(camera.rotation.y) * speed
     ))
-  }
+  } */
 
   raycaster.setFromCamera(pointer, camera)
   /* const intersects = raycaster.intersectObjects(scene.children)
@@ -304,11 +304,11 @@ function render() {
     if (INTERSECTED && INTERSECTED.material.color) INTERSECTED.material.color.setHex(INTERSECTED.currentHex)
     INTERSECTED = null
   } */
-  
+
   // 真正渲染
   renderer.render(scene, camera)
 }
-function animate() {
+function animate () {
   requestAnimationFrame(animate)
   render()
 
@@ -317,7 +317,7 @@ function animate() {
 }
 
 let bullet = null
-function onMouseDown(event) {
+function onMouseDown (event) {
   if (bullet instanceof THREE.Mesh) {
     scene.remove(bullet)
   }
@@ -333,9 +333,9 @@ function onMouseDown(event) {
   scene.add(bullet)
 }
 
-function onKeyDown(event) {
+function onKeyDown (event) {
   const { keyCode } = event
-  switch(keyCode) {
+  switch (keyCode) {
     case 37: // left
       camera.rotateY(0.01)
       break
@@ -359,7 +359,7 @@ onMounted(() => {
   initPlane()
   initShape()
   initControls()
-  // initModel()
+  initModel()
   initLight()
   initObject()
   initStats()
@@ -370,7 +370,7 @@ onMounted(() => {
   let tween1 = new TWEEN.Tween(cube.position).to({ x: 4, y: 4, z: 4 }, 5 * 1000)
   let tween2 = new TWEEN.Tween(cube.position).to({ x: 0, y: 0, z: 0 }, 5 * 1000)
   tween1.chain(tween2)
-  tween2.chain(tween1)  
+  tween2.chain(tween1)
 
   // tween1.start()
   document.addEventListener('mousemove', onPointerMove)
@@ -386,5 +386,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
