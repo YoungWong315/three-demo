@@ -73,7 +73,7 @@ function initGround () {
   mesh.receiveShadow = true;
   scene.add(mesh);
 
-  const grid = new THREE.GridHelper(1000, 10000, 0x000000, 0x000000);
+  const grid = new THREE.GridHelper(1000, 1000, 0x000000, 0x000000);
   grid.material.opacity = 0.2;
   grid.material.transparent = true;
   scene.add(grid);
