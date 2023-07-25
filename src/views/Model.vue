@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 /* import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls'
 import { DragControls } from 'three/examples/jsm/controls/DragControls' */
@@ -18,6 +19,8 @@ const containerHeight = window.innerHeight
 let scene = null
 function initScene () {
   scene = new THREE.Scene()
+  scene.background = new THREE.Color(0xf2f2f2);
+  // scene.fog = new THREE.Fog(0xf2f2f2, 200, 1000);
 }
 // 相机
 let camera = null
@@ -55,31 +58,65 @@ function initControls () {
 }
 let light
 function initLight () {
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
   light = new THREE.DirectionalLight(0xffffff, 2.0)
   light.position.set(100, 100, 100)
   light.castShadow = true
   scene.add(ambientLight)
   scene.add(light)
+
 }
-let model = null
+function initGround () {
+  // ground
+  const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshPhongMaterial({ color: 0x999999, depthWrite: false }));
+  mesh.rotation.x = - Math.PI / 2;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+
+  const grid = new THREE.GridHelper(1000, 10000, 0x000000, 0x000000);
+  grid.material.opacity = 0.2;
+  grid.material.transparent = true;
+  scene.add(grid);
+}
+
+let model1 = null
+let model2 = null
+let model3 = null
+let mixer = null
 function initModel () {
-  const loader = new GLTFLoader()
-  loader.load(
+  /* const loader1 = new GLTFLoader()
+  loader1.load(
     // resource URL
     'models/mcc/gltf/123.gltf',
     // called when the resource is loaded
     (gltf) => {
-      model = gltf
-      model.scene.position.x = 1
-      model.scene.position.y = 1
-      model.scene.position.z = 0
-      scene.add(model.scene)
-      /* gltf.animations // Array<THREE.AnimationClip>
-      gltf.scene // THREE.Group
-      gltf.scenes // Array<THREE.Group>
-      gltf.cameras // Array<THREE.Camera>
-      gltf.asset // Object */
+      model1 = gltf
+      model1.scene.position.x = 1
+      model1.scene.position.y = 1
+      model1.scene.position.z = 0
+      scene.add(model1.scene)
+    },
+    // called while loading is progressing
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    // called when loading has errors
+    (error) => {
+      console.log('An error happened', error)
+    }
+  ) */
+
+  const loader2 = new GLTFLoader()
+  loader2.load(
+    // resource URL
+    'models/mcc/122.glb',
+    // called when the resource is loaded
+    (gltf) => {
+      model2 = gltf
+      model2.scene.position.x = 1
+      model2.scene.position.y = 1
+      model2.scene.position.z = 0
+      scene.add(model2.scene)
     },
     // called while loading is progressing
     (xhr) => {
@@ -90,6 +127,40 @@ function initModel () {
       console.log('An error happened', error)
     }
   )
+
+  /* const loader3 = new FBXLoader()
+  loader3.load(
+    // resource URL
+    // 'models/Samba Dancing.fbx',
+    'models/mcc/111.fbx',
+    // called when the resource is loaded
+    (object) => {
+      model3 = object
+      // mixer = new THREE.AnimationMixer(object);
+
+      // const action = mixer.clipAction(object.animations[0]);
+      // action.play();
+
+      // object.traverse(function (child) {
+
+      //   if (child.isMesh) {
+
+      //     child.castShadow = true;
+      //     child.receiveShadow = true;
+
+      //   }
+      // });
+      scene.add(model3)
+    },
+    // called while loading is progressing
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    // called when loading has errors
+    (error) => {
+      console.log('An error happened', error)
+    }
+  ) */
 }
 
 const raycaster = new THREE.Raycaster()
@@ -101,6 +172,7 @@ function onPointerMove (event) {
 }
 
 // 实时渲染
+const clock = new THREE.Clock();
 function render () {
   raycaster.setFromCamera(pointer, camera)
 
@@ -109,7 +181,10 @@ function render () {
 }
 function animate () {
   requestAnimationFrame(animate)
-  // orbitControls.update();
+
+  const delta = clock.getDelta();
+  if (mixer) mixer.update(delta);
+
   render()
 }
 
@@ -118,18 +193,18 @@ function onKeyDown (event) {
   switch (keyCode) {
     case 37: // left
       // camera.rotateY(-0.01)
-      model.scene.position.x -= 0.1
+      model1.scene.position.x -= 0.1
       break
     case 38: // up
       // camera.position.z += 1
-      model.scene.position.y += 0.1
+      model1.scene.position.y += 0.1
       break
     case 39: // right
       // camera.rotateY(0.01)
-      model.scene.position.x += 0.1
+      model1.scene.position.x += 0.1
       break
     case 40: // down
-      model.scene.position.y -= 0.1
+      model1.scene.position.y -= 0.1
       break
   }
 }
@@ -139,6 +214,7 @@ onMounted(() => {
   initCamera()
   initRenderer()
   initControls()
+  initGround()
   initModel()
   initLight()
 
