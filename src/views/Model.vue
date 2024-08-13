@@ -64,7 +64,6 @@ function initLight () {
   light.castShadow = true
   scene.add(ambientLight)
   scene.add(light)
-
 }
 function initGround () {
   // ground
@@ -106,7 +105,7 @@ function initModel () {
     }
   ) */
 
-  const loader2 = new GLTFLoader()
+  /* const loader2 = new GLTFLoader()
   loader2.load(
     // resource URL
     'models/mcc/122.glb',
@@ -126,13 +125,15 @@ function initModel () {
     (error) => {
       console.log('An error happened', error)
     }
-  )
+  ) */
 
-  /* const loader3 = new FBXLoader()
+  const loader3 = new FBXLoader()
   loader3.load(
     // resource URL
     // 'models/Samba Dancing.fbx',
-    'models/mcc/111.fbx',
+    // 'models/mcc/111.fbx',
+    // 'models/mcc/L401-501-601.FBX',
+    'models/mcc/DuiQuLiao.fbx',
     // called when the resource is loaded
     (object) => {
       model3 = object
@@ -160,7 +161,7 @@ function initModel () {
     (error) => {
       console.log('An error happened', error)
     }
-  ) */
+  )
 }
 
 const raycaster = new THREE.Raycaster()
@@ -223,7 +224,7 @@ onMounted(() => {
   document.addEventListener('mousemove', onPointerMove)
   document.addEventListener('keydown', onKeyDown)
 })
-</script> 
+</script>
 
 <template>
   <div>
