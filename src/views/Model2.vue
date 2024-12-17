@@ -9,7 +9,7 @@ import { ArcballControls } from 'three/examples/jsm/controls/ArcballControls'
 import { DragControls } from 'three/examples/jsm/controls/DragControls' */
 import Stats from 'stats.js'
 import TWEEN from '@tweenjs/tween.js'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const containerWidth = window.innerWidth
@@ -25,9 +25,9 @@ function initScene () {
 // 相机
 let camera = null
 function initCamera () {
-  camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 1, 1000)
+  camera = new THREE.PerspectiveCamera(45, containerWidth / containerHeight, 1, 10000)
   // 相机默认在原点（0,0,0），要综合考虑场景中物体z轴的距离才能看到，需要z轴里原点远一些（靠近人的方向）
-  camera.position.set(0, 150, 200)
+  camera.position.set(0, 1500, 2000)
   camera.up.set(0, 1, 0)
 }
 // 渲染器
@@ -130,16 +130,15 @@ function initModel () {
   const loader3 = new FBXLoader()
   loader3.load(
     // resource URL
-    'models/Samba Dancing.fbx',
-    // 'models/mcc/111.fbx',
+    // 'models/Samba Dancing.fbx',
+    'models/mcc/111.fbx',
     // 'models/mcc/L401-501-601.FBX',
     // 'models/mcc/DuiQuLiao.fbx',
     // called when the resource is loaded
     (object) => {
       model3 = object
-      mixer = new THREE.AnimationMixer(object);
-
-      console.log(object.animations)
+      console.log(object)
+      /* mixer = new THREE.AnimationMixer(object);
 
       const action = mixer.clipAction(object.animations[0]);
       action.play();
@@ -152,11 +151,19 @@ function initModel () {
           child.receiveShadow = true;
 
         }
-      });
-
-      // 缩放模型
-      model3.scale.set(0.5, 0.5, 0.5)
+      }); */
+      model3.scale.set(0.2, 0.2, 0.2)
       scene.add(model3)
+
+      // 为模型的每个mesh添加name属性(如果没有的话)
+      model3.traverse((child) => {
+        if (child.isMesh && !child.name) {
+          child.name = `mesh_${Math.random().toString(36).substr(2, 9)}`
+        }
+      })
+
+      // 添加点击事件监听
+      document.addEventListener('click', onClick)
     },
     // called while loading is progressing
     (xhr) => {
@@ -215,6 +222,44 @@ function onKeyDown (event) {
   }
 }
 
+// 添加点击事件处理函数
+function onClick (event) {
+  // 更新鼠标位置
+  pointer.x = (event.clientX / containerWidth) * 2 - 1
+  pointer.y = -(event.clientY / containerHeight) * 2 + 1
+
+  // 更新射线
+  raycaster.setFromCamera(pointer, camera)
+
+  // 检测射线与模型的交点
+  if (model3) {
+    const intersects = raycaster.intersectObject(model3, true) // true表示检测所有子对象
+
+    if (intersects.length > 0) {
+      const intersect = intersects[0]
+      console.log('点击到的构件:', {
+        object: intersect.object, // 点击到的mesh对象
+        point: intersect.point, // 点击位置的3D坐标
+        distance: intersect.distance, // 到相机的距离
+        name: intersect.object.name, // mesh的名称
+        type: intersect.object.type, // 对象类型
+        material: intersect.object.material, // 材质信息
+        geometry: intersect.object.geometry // 几何信息
+      })
+
+      // 可以在这里添加点击效果,比如改变颜色
+      const currentColor = intersect.object.material.color
+      // intersect.material.color.setStyle(xff0000) // 设置为红色
+      intersect.object.material = new THREE.MeshPhysicalMaterial({ color: "#ff0" });
+
+      // 1秒后恢复原色
+      /* setTimeout(() => {
+        intersect.object.material.color.copy(currentColor)
+      }, 1000) */
+    }
+  }
+}
+
 onMounted(() => {
   initScene()
   initCamera()
@@ -228,6 +273,13 @@ onMounted(() => {
 
   document.addEventListener('mousemove', onPointerMove)
   document.addEventListener('keydown', onKeyDown)
+})
+
+// 在组件卸载时移除事件监听
+onUnmounted(() => {
+  document.removeEventListener('click', onClick)
+  document.removeEventListener('mousemove', onPointerMove)
+  document.removeEventListener('keydown', onKeyDown)
 })
 </script>
 
